@@ -1,5 +1,7 @@
 #include <bits/stdc++.h>
+#include <chrono>
 using namespace std;
+using namespace std::chrono;
 
 const int MAKS_HARI = 20;
 
@@ -143,7 +145,10 @@ int main() {
     }
 
     vector<int> lahan_tersedia(baris * kolom, 0);
+    auto mulai = high_resolution_clock::now();
     HasilMemo hasil = cari(1, modal_awal, lahan_tersedia);
+    auto selesai = high_resolution_clock::now();
+    auto durasi = duration_cast<milliseconds>(selesai - mulai);
 
     int hari_per_musim = jumlah_hari / 2;
     int sisa = jumlah_hari % 2;
@@ -190,6 +195,9 @@ int main() {
         cout << daftar_tanaman[aksi.id_tanaman].nama << ": " << k << "\n";
     }
     cout << "Total keuntungan dihitung: " << total << "\n";
+
+    cout << "\n=== WAKTU EKSEKUSI ===\n";
+    cout << "Program dieksekusi dalam " << durasi.count() << " ms\n";
 
     return 0;
 }

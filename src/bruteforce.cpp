@@ -1,5 +1,7 @@
 #include <bits/stdc++.h>
+#include <chrono>
 using namespace std;
+using namespace std::chrono;
 
 struct Tanaman {
     string nama;
@@ -124,13 +126,25 @@ int main() {
     }
 
     vector<int> lahan_tersedia(total_petak, 0);
+    auto mulai = high_resolution_clock::now();
     brute_force(1, modal_awal, lahan_tersedia, {}, 0);
+    auto selesai = high_resolution_clock::now();
+    auto durasi = duration_cast<milliseconds>(selesai - mulai);
 
-    int batas_kemarau = jumlah_hari / 2 + (jumlah_hari % 2 > 0 ? 1 : 0);
+    int hari_per_musim = jumlah_hari / 2;
+    int sisa = jumlah_hari % 2;
+    int batas_kemarau = hari_per_musim + (sisa > 0 ? 1 : 0);
     int awal_hujan = batas_kemarau + 1;
 
+    cout << "\n=== INFO MUSIM ===\n";
+    cout << "Jumlah hari: " << jumlah_hari << "\n";
+    cout << "Musim KEMARAU: Hari 1 - " << batas_kemarau << "\n";
+    if (awal_hujan <= jumlah_hari) {
+        cout << "Musim HUJAN: Hari " << awal_hujan << " - " << jumlah_hari << "\n";
+    }
+
     cout << "\n=== HASIL AKHIR ===\n";
-    cout << "Profit maksimum: " << profit_maks << "\n";
+    cout << "Keuntungan maksimal: " << profit_maks << "\n";
 
     tampilkan_lahan(hasil_terbaik, 1, "KEMARAU");
     if (awal_hujan <= jumlah_hari)
@@ -145,20 +159,24 @@ int main() {
         int r = a.petak / kolom + 1;
         int c = a.petak % kolom + 1;
         string musim_str = (a.hari <= batas_kemarau) ? "KEMARAU" : "HUJAN";
-        cout << "Hari " << a.hari << " (" << musim_str << "): Tanam " 
-             << daftar_tanaman[a.id_tanaman].nama << " di petak (" 
-             << r << "," << c << ") -> Panen hari " << a.hari_panen 
+        cout << "Hari " << a.hari << " (" << musim_str << "): Tanam "
+             << daftar_tanaman[a.id_tanaman].nama << " di petak ("
+             << r << "," << c << ") -> Panen hari " << a.hari_panen
              << " (Keuntungan: " << daftar_tanaman[a.id_tanaman].keuntungan() << ")\n";
     }
 
     cout << "\n=== RINCIAN PROFIT ===\n";
     int total = 0;
     for (const auto& a : hasil_terbaik) {
-        total += daftar_tanaman[a.id_tanaman].keuntungan();
-        cout << daftar_tanaman[a.id_tanaman].nama << ": " 
-             << daftar_tanaman[a.id_tanaman].keuntungan() << "\n";
+        int k = daftar_tanaman[a.id_tanaman].keuntungan();
+        total += k;
+        cout << daftar_tanaman[a.id_tanaman].nama << ": "
+             << k << "\n";
     }
-    cout << "Total profit terhitung: " << total << "\n";
+    cout << "Total keuntungan dihitung: " << total << "\n";
+
+    cout << "\n=== WAKTU EKSEKUSI ===\n";
+    cout << "Program dieksekusi dalam " << durasi.count() << " ms\n";
 
     return 0;
 }
