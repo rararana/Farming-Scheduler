@@ -2,6 +2,7 @@
 #include <chrono>
 using namespace std;
 using namespace std::chrono;
+int baris, kolom, jumlah_tanaman, jumlah_hari, modal_awal, hari_per_musim, sisa, batas_kemarau, awal_hujan;
 
 struct Tanaman {
     string nama;
@@ -19,16 +20,10 @@ struct Aksi {
     int hari_panen;
 };
 
-int baris, kolom, jumlah_tanaman, jumlah_hari, modal_awal;
 vector<Tanaman> daftar_tanaman;
 int total_petak;
 int profit_maks = 0;
 vector<Aksi> hasil_terbaik;
-
-int musim_hari(int hari) {
-    int batas = jumlah_hari / 2 + (jumlah_hari % 2 > 0 ? 1 : 0);
-    return (hari <= batas) ? 0 : 1;
-}
 
 void tampilkan_lahan(const vector<Aksi>& aksi, int hari_target, const string& musim) {
     cout << "\n=== Lahan Hari ke-" << hari_target << " (" << musim << ") ===\n";
@@ -89,7 +84,8 @@ void brute_force(int hari, int modal, vector<int> ketersediaan, vector<Aksi> aks
             coba_petak(indeks + 1, lahan, aksi_hari_ini, sisa_modal);
 
             if (lahan[indeks] < hari) {
-                int musim = musim_hari(hari);
+                int batas = jumlah_hari / 2 + (jumlah_hari % 2 > 0 ? 1 : 0);
+                int musim = (hari <= batas) ? 0 : 1;
                 for (int i = 0; i < jumlah_tanaman; i++) {
                     const auto& t = daftar_tanaman[i];
                     if (t.musim == musim && sisa_modal >= t.harga_beli && hari + t.waktu_panen <= jumlah_hari) {
@@ -131,10 +127,10 @@ int main() {
     auto selesai = high_resolution_clock::now();
     auto durasi = duration_cast<milliseconds>(selesai - mulai);
 
-    int hari_per_musim = jumlah_hari / 2;
-    int sisa = jumlah_hari % 2;
-    int batas_kemarau = hari_per_musim + (sisa > 0 ? 1 : 0);
-    int awal_hujan = batas_kemarau + 1;
+    hari_per_musim = jumlah_hari / 2;
+    sisa = jumlah_hari % 2;
+    batas_kemarau = hari_per_musim + (sisa > 0 ? 1 : 0);
+    awal_hujan = batas_kemarau + 1;
 
     cout << "\n=== INFO MUSIM ===\n";
     cout << "Jumlah hari: " << jumlah_hari << "\n";
@@ -146,9 +142,10 @@ int main() {
     cout << "\n=== HASIL AKHIR ===\n";
     cout << "Keuntungan maksimal: " << profit_maks << "\n";
 
-    tampilkan_lahan(hasil_terbaik, 1, "KEMARAU");
-    if (awal_hujan <= jumlah_hari)
-        tampilkan_lahan(hasil_terbaik, awal_hujan, "HUJAN");
+    for(int i=1; i<=jumlah_hari; i++){
+        if(i < awal_hujan) tampilkan_lahan(hasil_terbaik, i, "KEMARAU");
+        else  tampilkan_lahan(hasil_terbaik, i, "HUJAN");
+    }
 
     cout << "\n=== AKSI TANAM ===\n";
     sort(hasil_terbaik.begin(), hasil_terbaik.end(), [](const Aksi& a, const Aksi& b) {

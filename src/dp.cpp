@@ -2,6 +2,7 @@
 #include <chrono>
 using namespace std;
 using namespace std::chrono;
+int baris, kolom, jumlah_tanaman, jumlah_hari, modal_awal, hari_per_musim, sisa, batas_kemarau, awal_hujan;
 
 struct Tanaman {
     string nama;
@@ -19,14 +20,12 @@ struct Aksi {
     int hari_panen;
 };
 
-int baris, kolom, jumlah_tanaman, jumlah_hari, modal_awal;
-vector<Tanaman> daftar_tanaman;
-
 struct HasilMemo {
     int total_keuntungan;
     vector<Aksi> daftar_aksi;
 };
 
+vector<Tanaman> daftar_tanaman;
 map<string, HasilMemo> memo;
 
 string buat_kunci(int hari, int modal, const vector<int>& ketersediaan) {
@@ -43,19 +42,12 @@ HasilMemo cari(int hari, int modal, vector<int>& ketersediaan) {
     string kunci = buat_kunci(hari, modal, ketersediaan);
     if (memo.count(kunci)) return memo[kunci];
 
-    int hari_per_musim = jumlah_hari / 2;
-    int sisa = jumlah_hari % 2;
-    int batas_kemarau = hari_per_musim + (sisa > 0 ? 1 : 0);
     int musim = (hari <= batas_kemarau) ? 0 : 1;
-
     HasilMemo hasil_terbaik = {0, {}};
-
     function<void(int, int, vector<int>&, vector<Aksi>&)> coba_tanam = 
         [&](int modal_sekarang, int indeks_petak, vector<int>& ketersediaan_sekarang, vector<Aksi>& aksi_sekarang) {
-            
             HasilMemo hasil_mendatang = cari(hari + 1, modal_sekarang, ketersediaan_sekarang);
             int keuntungan_total = hasil_mendatang.total_keuntungan;
-
             for (const auto& aksi : aksi_sekarang) {
                 keuntungan_total += daftar_tanaman[aksi.id_tanaman].keuntungan();
             }
@@ -89,7 +81,6 @@ HasilMemo cari(int hari, int modal, vector<int>& ketersediaan) {
 
     vector<Aksi> kosong;
     coba_tanam(modal, 0, ketersediaan, kosong);
-
     return memo[kunci] = hasil_terbaik;
 }
 
@@ -142,16 +133,16 @@ int main() {
         daftar_tanaman[i].musim = (musim_str == "KEMARAU") ? 0 : 1;
     }
 
+    hari_per_musim = jumlah_hari / 2;
+    sisa = jumlah_hari % 2;
+    batas_kemarau = hari_per_musim + (sisa > 0 ? 1 : 0);
+    awal_hujan = batas_kemarau + 1;
+
     vector<int> lahan_tersedia(baris * kolom, 0);
     auto mulai = high_resolution_clock::now();
     HasilMemo hasil = cari(1, modal_awal, lahan_tersedia);
     auto selesai = high_resolution_clock::now();
     auto durasi = duration_cast<milliseconds>(selesai - mulai);
-
-    int hari_per_musim = jumlah_hari / 2;
-    int sisa = jumlah_hari % 2;
-    int batas_kemarau = hari_per_musim + (sisa > 0 ? 1 : 0);
-    int awal_hujan = batas_kemarau + 1;
 
     cout << "\n=== INFO MUSIM ===\n";
     cout << "Jumlah hari: " << jumlah_hari << "\n";
@@ -163,9 +154,9 @@ int main() {
     cout << "\n=== HASIL AKHIR ===\n";
     cout << "Keuntungan maksimal: " << hasil.total_keuntungan << "\n";
 
-    tampilkan_lahan(hasil.daftar_aksi, 1, "KEMARAU");
-    if (awal_hujan <= jumlah_hari) {
-        tampilkan_lahan(hasil.daftar_aksi, awal_hujan, "HUJAN");
+    for(int i=1; i<=jumlah_hari; i++){
+        if(i < awal_hujan) tampilkan_lahan(hasil.daftar_aksi, i, "KEMARAU");
+        else  tampilkan_lahan(hasil.daftar_aksi, i, "HUJAN");
     }
 
     cout << "\n=== AKSI TANAM ===\n";

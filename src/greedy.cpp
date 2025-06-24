@@ -2,6 +2,7 @@
 #include <chrono>
 using namespace std;
 using namespace std::chrono;
+int baris, kolom, jumlah_tanaman, jumlah_hari, modal_awal, hari_per_musim, sisa, batas_kemarau, awal_hujan;
 
 struct Tanaman {
     string nama;
@@ -19,17 +20,9 @@ struct Aksi {
     int hari_panen;
 };
 
-int baris, kolom, jumlah_tanaman, jumlah_hari, modal_awal;
 vector<Tanaman> daftar_tanaman;
 vector<int> lahan_tersedia;
 vector<Aksi> aksi_terjadi;
-
-int hitung_musim(int hari) {
-    int hari_per_musim = jumlah_hari / 2;
-    int sisa = jumlah_hari % 2;
-    int batas_kemarau = hari_per_musim + (sisa > 0 ? 1 : 0);
-    return (hari <= batas_kemarau) ? 0 : 1;
-}
 
 void tampilkan_lahan(const vector<Aksi>& aksi, int hari_target, string nama_musim) {
     cout << "\n=== Lahan Hari ke-" << hari_target << " (" << nama_musim << ") ===" << endl;
@@ -90,7 +83,8 @@ int main() {
     lahan_tersedia.assign(total_petak, 0);
 
     for (int hari = 1; hari <= jumlah_hari; hari++) {
-        int musim = hitung_musim(hari);
+        int batas = jumlah_hari / 2 + (jumlah_hari % 2 > 0 ? 1 : 0);
+        int musim = (hari <= batas) ? 0 : 1;
         for (int petak = 0; petak < total_petak; petak++) {
             if (lahan_tersedia[petak] < hari) {
                 for (int i = 0; i < jumlah_tanaman; i++) {
@@ -113,10 +107,10 @@ int main() {
         total_keuntungan += daftar_tanaman[aksi.id_tanaman].keuntungan();
     }
     
-    int hari_per_musim = jumlah_hari / 2;
-    int sisa = jumlah_hari % 2;
-    int batas_kemarau = hari_per_musim + (sisa > 0 ? 1 : 0);
-    int awal_hujan = batas_kemarau + 1;
+    hari_per_musim = jumlah_hari / 2;
+    sisa = jumlah_hari % 2;
+    batas_kemarau = hari_per_musim + (sisa > 0 ? 1 : 0);
+    awal_hujan = batas_kemarau + 1;
 
     cout << "\n=== INFO MUSIM ===\n";
     cout << "Jumlah hari: " << jumlah_hari << "\n";
