@@ -142,11 +142,6 @@ int main() {
         daftar_tanaman[i].musim = (musim_str == "KEMARAU") ? 0 : 1;
     }
 
-    sort(daftar_tanaman.begin(), daftar_tanaman.end(),
-         [](const Tanaman& a, const Tanaman& b) {
-             return (double)a.keuntungan() / a.waktu_panen > (double)b.keuntungan() / b.waktu_panen;
-         });
-
     vector<int> lahan_tersedia(baris * kolom, 0);
     HasilMemo hasil = cari(1, modal_awal, lahan_tersedia);
 
