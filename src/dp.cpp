@@ -3,8 +3,6 @@
 using namespace std;
 using namespace std::chrono;
 
-const int MAKS_HARI = 20;
-
 struct Tanaman {
     string nama;
     int harga_beli;
